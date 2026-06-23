@@ -9,8 +9,13 @@ Run after run_scraper.py has populated data/raw/
 """
 
 import logging
+import os
+import sys
 
-from src.parser import parse_all
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+
+from src.parser import parse_all  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
