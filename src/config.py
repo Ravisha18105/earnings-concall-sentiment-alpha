@@ -36,6 +36,8 @@ TICKERS = [
     "UNH",
 ]
 
+FORWARD_RETURN_DAYS = [1, 5, 20]
+
 SECTORS = {
     "AAPL": "Technology",
     "MSFT": "Technology",
@@ -47,6 +49,13 @@ SECTORS = {
     "JPM": "Financials",
     "V": "Financials",
     "UNH": "Healthcare",
+}
+
+SIGNAL_WEIGHTS = {
+    "guidance_net": 0.40,
+    "qa_ceo_net": 0.30,
+    "prep_net": 0.20,
+    "lm_uncertainty": -0.10,
 }
 
 LOOKBACK_QUARTERS = 8
