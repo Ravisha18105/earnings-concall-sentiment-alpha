@@ -14,7 +14,6 @@ Pipeline:
 """
 import logging
 
-import numpy as np
 import pandas as pd
 from scipy import stats
 
@@ -89,36 +88,14 @@ def build_composite(df: pd.DataFrame) -> pd.Series:
 # ── step 4: quintile ranking ──────────────────────────────────────────────────
 
 
-def assign_quintiles(series: pd.Series) -> pd.Series:
-    """
-    Assign quintiles 1–5.
-    Handles NaNs and very small groups safely.
-    """
-
-    valid = series.dropna()
-
-    if len(valid) < 5:
-        return pd.Series(np.nan, index=series.index)
-
+def assign_quintiles(series: pd.Series, n: int = 5) -> pd.Series:
+    """Assign quintile ranks 1..n. Use n=5 (quintiles) for standard analysis."""
     try:
-        quintiles = pd.qcut(
-            valid,
-            q=5,
-            labels=[1, 2, 3, 4, 5],
-            duplicates="drop",
-        )
-
+        return pd.qcut(series, q=n, labels=list(range(1, n + 1)), duplicates="drop").astype(float)
     except ValueError:
-        quintiles = pd.qcut(
-            valid.rank(method="first"),
-            q=5,
-            labels=[1, 2, 3, 4, 5],
+        return pd.cut(series.rank(method="first"), bins=n, labels=list(range(1, n + 1))).astype(
+            float
         )
-
-    result = pd.Series(np.nan, index=series.index)
-    result.loc[valid.index] = quintiles.astype(float)
-
-    return result
 
 
 # ── step 5: preview IC ────────────────────────────────────────────────────────
@@ -206,7 +183,9 @@ def build_signals(overwrite: bool = False) -> pd.DataFrame:
     logger.info(f"\nComposite stats:\n{df['composite_z'].describe()}")
 
     # 8. Quintile ranks (cross-sectional within each quarter)
-    df["quintile"] = df.groupby("quarter")["composite_z"].transform(assign_quintiles)
+    df["quintile"] = df.groupby("quarter")["composite_z"].transform(
+        lambda x: assign_quintiles(x, n=5)
+    )
 
     # 9. Preview IC
     for days in [1, 5, 20]:

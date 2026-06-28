@@ -75,12 +75,12 @@ def compute_forward_returns(
         result = {**row.to_dict()}
 
         for days in FORWARD_RETURN_DAYS:
-            # Get price N trading days after t+1
-            target_idx = future_days[days - 1] if len(future_days) >= days else None
-            if target_idx is not None:
-                fwd_price = ticker_prices.loc[target_idx]
-                fwd_ret = (fwd_price / t1_price) - 1
-                result[f"fwd_{days}d"] = round(float(fwd_ret), 6)
+            target_position = days
+            if len(future_days) > target_position:
+                target_date = future_days[target_position]
+                target_price = ticker_prices.loc[target_date]
+                forward_return = (target_price / t1_price) - 1
+                result[f"fwd_{days}d"] = round(float(forward_return), 6)
             else:
                 result[f"fwd_{days}d"] = None
 
